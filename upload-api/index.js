@@ -3,11 +3,13 @@ const multer = require("multer");
 const XLSX = require("xlsx");
 const fs = require("fs");
 const path = require("path");
-//const bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 
 const app = express();
 app.use("/static", express.static(path.join(__dirname, "static")));
 app.use("/uploads", express.static('uploads'))
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
 //const varUrlEncodedParser = bodyParser.urlencoded({ extended: false });
 
@@ -149,6 +151,13 @@ app.post('/upload', upload.single('file'), (req, res) => {
         console.log(`writing to: ${req.file.path}`);
         console.log(`writing to: ${processed_file}`);
 
+        const host = req.hostname;
+        const filePath = req.protocol + "://" + host + '/' + req.file.path;
+
+        console.log(host);
+        console.log(filePath);
+
+
         //res.redirect(`/download/${processed_file}`);
 
         //res.render('/')
@@ -167,15 +176,15 @@ app.get('/uploads/:file', (req, res) => {
     res.download(`${req.params.file}`);
 });
 
-//app.get('/download/:file(*)', (req, res) => {
-//    console.log('here');
-//    //console.log(req);
-//    console.log(req.params.file);
-//    var file = req.params.file;
-//    var fileLocation = path.join('/',file);
-//    console.log(fileLocation);
-//    res.download(fileLocation, file); 
-//});
+app.get('/download/:file(*)', (req, res) => {
+    console.log('here');
+    //console.log(req);
+    console.log(req.params.file);
+    var file = req.params.file;
+    var fileLocation = path.join('/',file);
+    console.log(fileLocation);
+    res.download(fileLocation, file); 
+});
 
 app.use(function(err, req, res, next) {
     if (err.code === "LIMIT_FILE_TYPES") {
