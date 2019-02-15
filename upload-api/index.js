@@ -4,12 +4,15 @@ const XLSX = require("xlsx");
 const fs = require("fs");
 const path = require("path");
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
 app.use("/static", express.static(path.join(__dirname, "static")));
 app.use("/uploads", express.static('uploads'))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cors());
+
 
 //const varUrlEncodedParser = bodyParser.urlencoded({ extended: false });
 
