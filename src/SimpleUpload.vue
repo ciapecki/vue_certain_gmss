@@ -16,7 +16,7 @@
             <div id="info_message">Below values will be populated for all the records in the file. Later edit can be done in the final file.</div>
 
             <label for="campaign_code">Campaign Code:</label>
-            <input type="text" class="user_input" name="campaign_code" v-model="campaign_code" placeholder="campaign_code here">
+            <input type="text" class="user_input" name="campaign_code" v-model="campaign_code" placeholder="campaign_code here - Only if you want to overwrite the one in the file in second row">
 
             <label for="response_type">Response Type:</label>
             <input type="text" class="user_input" name="response_type" v-model="response_type" placeholder="e.g. Event Attended
@@ -139,7 +139,7 @@ export default {
                 this.uploadedFiles.push(res.data.file);
                 //this.message = `File has been uploaded ${this.uploadedFiles[0].originalname}`;
                 this.message = `Success: please download the converted file from the link below:`;
-                this.legacySystemHTML = `<a href="http://${window.location.hostname}:3344/${res.data.file}" target="_blank">http://${window.location.hostname}:3344/${res.data.file}</a>`;
+                this.legacySystemHTML = `<a @click.prevent="downloadAndRedirect" href="http://${window.location.hostname}:3344/${res.data.file}" target="_blank">http://${window.location.hostname}:3344/${res.data.file}</a>`;
                 this.file = "";
                 this.error = false;
                 this.showForm = false;
@@ -148,7 +148,13 @@ export default {
                 this.message = err.response.data.error;
                 this.error = true;
             }
-        }
+        },
+
+        //downloadAndRedirect(event) {
+        //    alert(event.target.tagName);
+        //    window.location=`${window.location.hostname}:8080`;
+        //    window.focus();
+        //}
     }
 }
 </script>

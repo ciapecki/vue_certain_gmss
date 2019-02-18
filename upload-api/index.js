@@ -100,16 +100,33 @@ function processExcel(req) {
     ["CAMPAIGN_CODE","RESPONSE_TYPE","RESPONSE_DATE","FIRST_NAME","LAST_NAME","COUNTRY","EMAIL_ADDRESS","COMPANY_NAME","WORK_PHONE_NO","JOB_TITLE","CITY","STATE_OR_PROVINCE","POSTAL_CODE","STREET_ADDRESS_1","STREET_ADDRESS_2","LEAD_OR_ADDITIONAL_NOTES"," NO_LEAD_FLOW","TRANSLATED_FIRST_NAME","TRANSLATED_LAST_NAME","TRANSLATED_COMPANY_NAME","CXD_CONTACT_ID","MARKETING_STATUS","SALES_REP_ID","PHONE_PREFERENCE","DIRECT_MAIL_PREFERENCE","EMAIL_PREFERENCE","TELEMARKETING_CALL_AGENT_NAME","TELEMARKETING_COMPANY_NAME"]
     ];
 
-    var campaign_code = req.body.campaign_code;
+    console.log(`input_rows[0][0] ${input_rows[0][0]}`)
+
+    var campaign_row = input_rows[1][0];
+    var date_row = input_rows[2][0];
+
+    console.log(campaign_row);
+    //myString.substring( myString.indexOf( '(' ) + 1, myString.indexOf( ')' ) );
+    var campaign_code = campaign_row.substring(campaign_row.indexOf('[')+1, campaign_row.indexOf(']'));
+    console.log(campaign_code);
+    console.log(date_row);
+    var response_date = new Date(date_row.substring(0,date_row.lastIndexOf("-")));
+    console.log(response_date);
+    response_date = `${("0" + response_date.getDate()).slice(-2)}-${("0" + (response_date.getMonth() + 1)).slice(-2)}-${response_date.getFullYear()}`
+    console.log(response_date);
+
+    campaign_code = req.body.campaign_code || campaign_code;
+    console.log(campaign_code);
     var RESPONSE_TYPE = req.body.response_type;
     //var RESPONSE_DATE = formatDate(workbook.Props.CreatedDate);
-    var RESPONSE_DATE = req.body.response_date;
+    RESPONSE_DATE = req.body.response_date || response_date;
+    console.log(response_date);
     
     console.log(`Response_Date: ${RESPONSE_DATE}`);
    //console.log(`Response_Date: ${req.body}`);
     console.log('start preparing');
 
-    for (let i = 4; i < input_rows.length; i++) { 
+    for (let i = 5; i < input_rows.length; i++) { 
     //console.log(input_rows[i]);
     let tmp_row = [];
     tmp_row[0] = campaign_code;
