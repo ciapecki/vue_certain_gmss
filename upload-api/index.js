@@ -3,14 +3,16 @@ const multer = require("multer");
 const XLSX = require("xlsx");
 const fs = require("fs");
 const path = require("path");
-const bodyParser = require('body-parser');
+//const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
+
+//app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded({extended: true}));
+
 app.use("/static", express.static(path.join(__dirname, "static")));
 app.use("/uploads", express.static('uploads'))
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors());
 
 
@@ -73,9 +75,13 @@ function formatDate(dateString) {
 }
 
 
-function processExcel(file) {
-    console.log(`start processing ${file}`);
-    var workbook = XLSX.readFile(file);
+//function processExcel(file) {
+function processExcel(req) {
+    console.log(`start processing ${req.file.path}`);
+    var workbook = XLSX.readFile(req.file.path);
+
+    var gmssWB = XLSX.utils.book_new();
+
     var first_sheet_name = workbook.SheetNames[0];
     console.log(`start processing ${first_sheet_name}`);
     var worksheet = workbook.Sheets[first_sheet_name];
@@ -83,27 +89,28 @@ function processExcel(file) {
     console.log(`start processing ${range}`);
 
     var input_rows = XLSX.utils.sheet_to_json(worksheet, {range: range, header: 1})
-    console.log(input_rows[4]);
-    console.log(input_rows[4].length);
-    console.log(input_rows.length);
+    //console.log(input_rows[4]);
+    //console.log(input_rows[4].length);
+    //console.log(input_rows.length);
 
-    var new_ws_name = "SheetJS";
+    var new_ws_name = "GMSS_CXD_Template";
 
     /* make worksheet */
     var ws_data = [
     ["CAMPAIGN_CODE","RESPONSE_TYPE","RESPONSE_DATE","FIRST_NAME","LAST_NAME","COUNTRY","EMAIL_ADDRESS","COMPANY_NAME","WORK_PHONE_NO","JOB_TITLE","CITY","STATE_OR_PROVINCE","POSTAL_CODE","STREET_ADDRESS_1","STREET_ADDRESS_2","LEAD_OR_ADDITIONAL_NOTES"," NO_LEAD_FLOW","TRANSLATED_FIRST_NAME","TRANSLATED_LAST_NAME","TRANSLATED_COMPANY_NAME","CXD_CONTACT_ID","MARKETING_STATUS","SALES_REP_ID","PHONE_PREFERENCE","DIRECT_MAIL_PREFERENCE","EMAIL_PREFERENCE","TELEMARKETING_CALL_AGENT_NAME","TELEMARKETING_COMPANY_NAME"]
     ];
 
-    var campaign_code = 'some campaign code here';
-    var RESPONSE_TYPE = 'some RESPONSE_TYPE here';
+    var campaign_code = req.body.campaign_code;
+    var RESPONSE_TYPE = req.body.response_type;
     //var RESPONSE_DATE = formatDate(workbook.Props.CreatedDate);
-    var RESPONSE_DATE = 'date';
+    var RESPONSE_DATE = req.body.response_date;
+    
     console.log(`Response_Date: ${RESPONSE_DATE}`);
-
+   //console.log(`Response_Date: ${req.body}`);
     console.log('start preparing');
 
     for (let i = 4; i < input_rows.length; i++) { 
-    console.log(input_rows[i]);
+    //console.log(input_rows[i]);
     let tmp_row = [];
     tmp_row[0] = campaign_code;
     tmp_row[1] = RESPONSE_TYPE;
@@ -125,34 +132,43 @@ function processExcel(file) {
     }
 
     ws_data.push(tmp_row);
-    console.log(tmp_row);
+    //console.log(tmp_row);
     
-    if (i > 10) break;
+    //if (i > 10) break; // remove that
     };
 
     var ws = XLSX.utils.aoa_to_sheet(ws_data);
 
     /* Add the worksheet to the workbook */
-    XLSX.utils.book_append_sheet(workbook, ws, new_ws_name);
+   //XLSX.utils.book_append_sheet(workbook, ws, new_ws_name);
+    XLSX.utils.book_append_sheet(gmssWB, ws, new_ws_name);
 
-    const out_file = `${file}_out.xls`;
-    XLSX.writeFile(workbook, out_file);
+    //const out_file = `${file}_out.xls`;
+    const out_file = `${req.file.path}_out.xls`;
+    //XLSX.writeFile(workbook, out_file);
+    XLSX.writeFile(gmssWB, out_file);
 
+    console.log('finishing the xls processing');
     return out_file;
     
 }
 
 // file is from formData from SimpleUpload.vue
 app.post('/upload', upload.single('file'), (req, res) => {
+    console.log('req.body.campaign_code');
+    console.log(req.body);
     var processed_file;
     try {
-        processed_file = processExcel(req.file.path);
+        //processed_file = processExcel(req.file.path);
+        processed_file = processExcel(req);
+        console.log('out from processing');
         // above function should process and save to ./static/${req.file.originalname}
         //fs.readFile
         //console.log(`req.body: ${req.body}`);
-        console.log(`writing to: ${JSON.stringify(req.file)}`);
-        console.log(`writing to: ${req.file.path}`);
-        console.log(`writing to: ${processed_file}`);
+        
+        //console.log(`writing to: ${JSON.stringify(req)}`);
+        //console.log(`writing to: ${req.file.path}`);
+        //console.log(`writing to: ${processed_file}`);
 
         const host = req.hostname;
         const filePath = req.protocol + "://" + host + '/' + req.file.path;

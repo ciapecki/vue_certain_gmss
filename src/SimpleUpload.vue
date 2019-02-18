@@ -12,39 +12,57 @@
         <div v-if="legacySystemHTML" class="legacySystemHTML" v-html="legacySystemHTML">
         </div>
 
-        <div class="field">
+        <div v-if="showForm" id="fileform"> 
+            <div id="info_message">Below values will be populated for all the records in the file. Later edit can be done in the final file.</div>
 
-            <div class="file is-boxed is-primary">
-                <label class="file-label">
+            <label for="campaign_code">Campaign Code:</label>
+            <input type="text" class="user_input" name="campaign_code" v-model="campaign_code" placeholder="campaign_code here">
 
-                    <input
-                        type="file"
-                        ref="file"
-                        @change="selectFile"
-                        class="file-input"
-                    />
+            <label for="response_type">Response Type:</label>
+            <input type="text" class="user_input" name="response_type" v-model="response_type" placeholder="e.g. Event Attended
+"> 
 
-                    <span class="file-cta">
-                        <span class="file-icon">
-                            <i class="fas fa-upload"></i>
+            <label for="response_date">Response Date:</label>
+            <input type="text" class="user_input" name="response_date" v-model="response_date" placeholder="DD/MMM/YYYY not mandatory in case of event uploads"> 
+
+            <div class="field">
+
+                <div class="file is-boxed is-primary">
+                    <label class="file-label">
+
+                        <input
+                            type="file"
+                            ref="file"
+                            @change="selectFile"
+                            class="file-input"
+                        />
+
+                        <span class="file-cta">
+                            <span class="file-icon">
+                                <i class="fas fa-upload"></i>
+                            </span>
+                            <span class="file-label">
+                                Choose a  file...
+                            </span>
                         </span>
-                        <span class="file-label">
-                            Choose a  file...
-                        </span>
-                    </span>
 
 
-                    <span v-if="file" class="file-name">{{file.name}}</span>
-                </label>
-                
+                        <span v-if="file" class="file-name">{{file.name}}</span>
+
+
+
+                    </label>
+                    
+                </div>
+
+
             </div>
 
+            <div class="field">
+                <button class="button is-info">Convert into GMSS Upload Template</button>
+            </div>
 
-        </div>
-
-        <div class="field">
-            <button class="button is-info">Send</button>
-        </div>
+         </div>
 
 <!--
         <div class="content">
@@ -77,7 +95,11 @@ export default {
             message: "",
             error: false,
             uploadedFiles: [],
-            legacySystemHTML: ""
+            legacySystemHTML: "",
+            campaign_code: "",
+            response_type: "",
+            response_date: "",
+            showForm: true
         }
     },
 
@@ -108,6 +130,9 @@ export default {
         async sendFile() {
             const formData  = new FormData();
             formData.append('file',this.file);
+            formData.append('campaign_code', this.campaign_code);
+            formData.append('response_type', this.response_type);
+            formData.append('response_date', this.response_date);
 
             try {
                 const res = await axios.post('/upload', formData);
@@ -117,6 +142,7 @@ export default {
                 this.legacySystemHTML = `<a href="http://${window.location.hostname}:3344/${res.data.file}" target="_blank">http://${window.location.hostname}:3344/${res.data.file}</a>`;
                 this.file = "";
                 this.error = false;
+                this.showForm = false;
             } catch(err) {
                 //this.message = "Something went wrong";
                 this.message = err.response.data.error;
@@ -126,4 +152,25 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+    input[type=text], select {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    }
+
+    #info_message {
+        font-size: 20px;
+        border-color: red;
+        border-bottom-style: groove;
+        margin-bottom: 20px;
+
+    }
+</style>
+
 
