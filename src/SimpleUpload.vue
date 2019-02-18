@@ -177,6 +177,17 @@ export default {
         margin-bottom: 20px;
 
     }
+
+    .button {
+        width: 100%;
+        height: 60px;
+    }
+
+    .file_label {
+        align-content: center;
+        width: 100%;
+    }
+
 </style>
 
 
